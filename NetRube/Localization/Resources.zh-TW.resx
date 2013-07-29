@@ -243,76 +243,94 @@
   <data name="CurrencyUnit" xml:space="preserve">
     <value>正圓拾佰仟萬拾佰仟億拾佰仟角分負</value>
   </data>
-  <data name="Day">
+  <data name="Day" xml:space="preserve">
     <value>日</value>
   </data>
-  <data name="Minute">
+  <data name="Minute" xml:space="preserve">
     <value>分</value>
   </data>
-  <data name="Month">
+  <data name="Month" xml:space="preserve">
     <value>月</value>
   </data>
-  <data name="Second">
+  <data name="Second" xml:space="preserve">
     <value>秒</value>
   </data>
-  <data name="TimeSpanDays">
+  <data name="TimeSpanDays" xml:space="preserve">
     <value>天</value>
   </data>
-  <data name="TimeSpanHours">
+  <data name="TimeSpanHours" xml:space="preserve">
     <value>小時</value>
   </data>
-  <data name="TimeSpanMilliseconds">
+  <data name="TimeSpanMilliseconds" xml:space="preserve">
     <value>毫秒</value>
   </data>
-  <data name="TimeSpanMinutes">
+  <data name="TimeSpanMinutes" xml:space="preserve">
     <value>分</value>
   </data>
-  <data name="TimeSpanSeconds">
+  <data name="TimeSpanSeconds" xml:space="preserve">
     <value>秒</value>
   </data>
-  <data name="Year">
+  <data name="Year" xml:space="preserve">
     <value>年</value>
   </data>
-  <data name="Hour">
+  <data name="Hour" xml:space="preserve">
     <value>時</value>
   </data>
-  <data name="ArgumentNullOrEmptyException">
+  <data name="ArgumentNullOrEmptyException" xml:space="preserve">
     <value>值不能爲 null 或 empty。</value>
   </data>
-  <data name="DriveType_Unknown">
+  <data name="DriveType_Unknown" xml:space="preserve">
     <value>不明</value>
   </data>
-  <data name="DriveType_NoRootDirectory">
+  <data name="DriveType_NoRootDirectory" xml:space="preserve">
     <value>沒有根目錄的磁碟</value>
   </data>
-  <data name="DriveType_Removable">
+  <data name="DriveType_Removable" xml:space="preserve">
     <value>抽取式存放裝置</value>
   </data>
-  <data name="DriveType_Fixed">
+  <data name="DriveType_Fixed" xml:space="preserve">
     <value>固定式磁碟</value>
   </data>
-  <data name="DriveType_Network">
+  <data name="DriveType_Network" xml:space="preserve">
     <value>網路磁碟機</value>
   </data>
-  <data name="DriveType_CDRom">
+  <data name="DriveType_CDRom" xml:space="preserve">
     <value>光碟機</value>
   </data>
-  <data name="DriveType_Ram">
+  <data name="DriveType_Ram" xml:space="preserve">
     <value>RAM 磁碟</value>
   </data>
-  <data name="UrlUnableAccess">
+  <data name="UrlUnableAccess" xml:space="preserve">
     <value>指定的 URL 無法訪問（響應代碼：{0}）</value>
   </data>
-  <data name="CouldNotFindTokenAtIndexException">
+  <data name="CouldNotFindTokenAtIndexException" xml:space="preserve">
     <value>在索引 {0} 處未檢索到記號</value>
   </data>
-  <data name="ExpectedColonAtIndexException">
+  <data name="ExpectedColonAtIndexException" xml:space="preserve">
     <value>在索引 {0} 處應爲冒號</value>
   </data>
-  <data name="UnrecognizedTokenAtIndexException">
+  <data name="UnrecognizedTokenAtIndexException" xml:space="preserve">
     <value>在索引 {0} 處出現無法識別的標記</value>
   </data>
-  <data name="UnexpectedlyReachedEndOfStringException">
+  <data name="UnexpectedlyReachedEndOfStringException" xml:space="preserve">
     <value>意外達到字串的末尾</value>
+  </data>
+  <data name="SerializerEncounteredMaximumDepth" xml:space="preserve">
+    <value>序列化物件時達到最大深度（{0}）限制</value>
+  </data>
+  <data name="MailPriorityHigh" xml:space="preserve">
+    <value>高</value>
+  </data>
+  <data name="MailPriorityLow" xml:space="preserve">
+    <value>低</value>
+  </data>
+  <data name="MailPriorityNormal" xml:space="preserve">
+    <value>常規</value>
+  </data>
+  <data name="CannotDetermineType" xml:space="preserve">
+    <value>無法確定型別</value>
+  </data>
+  <data name="NotSubclassException" xml:space="preserve">
+    <value>{0} 類並不是由 {1} 類派生的</value>
   </data>
 </root>

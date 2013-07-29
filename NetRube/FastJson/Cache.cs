@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 namespace NetRube.FastJson
@@ -8,25 +7,23 @@ namespace NetRube.FastJson
 	{
 		public readonly static Cache Instance = new Cache();
 
-		private Cache() { }
+		private Cache()
+		{
+			if(AC == null) AC = new Dict<string, Dictionary<string, JsonAccessor>>(StringComparer.OrdinalIgnoreCase);
+		}
 
-		private static ConcurrentDictionary<string, Dictionary<string, JsonAccessor>> AC;
+		private static Dict<string, Dictionary<string, JsonAccessor>> AC;
 		internal Dictionary<string, JsonAccessor> GetJsonAccessors(Type type)
 		{
-			if(AC == null) AC = new ConcurrentDictionary<string, Dictionary<string, JsonAccessor>>();
-
-			Dictionary<string, JsonAccessor> jas;
-			var typeName = type.FastGetFullName();
-			if(!AC.TryGetValue(typeName, out jas))
+			var typeName = type.FullName;
+			return AC.Get(typeName, () =>
 			{
 				var ls = type.FastGetAccessors();
-				jas = new Dictionary<string, JsonAccessor>(ls.Count);
+				var jas = new Dictionary<string, JsonAccessor>(ls.Count, StringComparer.OrdinalIgnoreCase);
 				foreach(var a in ls.Values)
 					jas.Add(a.Name, GetJsonAccessor(a));
-				AC.TryAdd(typeName, jas);
-			}
-
-			return jas;
+				return jas;
+			});
 		}
 
 		private JsonAccessor GetJsonAccessor(Accessor a)

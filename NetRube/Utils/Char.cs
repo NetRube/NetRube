@@ -1,4 +1,5 @@
-﻿namespace NetRube
+﻿
+namespace NetRube
 {
 	public static partial class Utils
 	{

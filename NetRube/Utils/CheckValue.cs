@@ -305,13 +305,8 @@ namespace NetRube
 		/// <returns>指示是否为数字</returns>
 		public static bool IsNumber_<T>(this T n)
 		{
-			return (n is sbyte || n is byte
-				|| n is short || n is ushort
-				|| n is int || n is uint
-				|| n is long || n is ulong
-				|| n is float
-				|| n is double
-				|| n is decimal);
+			var tc = Type.GetTypeCode(typeof(T));
+			return tc >= TypeCode.SByte && tc <= TypeCode.Decimal;
 		}
 
 		/// <summary>验证是否为整数（sbyte、byte、short、ushort、int、uint、long、ulong）</summary>
@@ -320,10 +315,8 @@ namespace NetRube
 		/// <returns>指示是否为整数</returns>
 		public static bool IsInt_<T>(this T n)
 		{
-			return (n is sbyte || n is byte
-				|| n is short || n is ushort
-				|| n is int || n is uint
-				|| n is long || n is ulong);
+			var tc = Type.GetTypeCode(typeof(T));
+			return tc >= TypeCode.SByte && tc <= TypeCode.UInt64;
 		}
 
 		/// <summary>验证是否为浮点数（float、double、decimal）</summary>
@@ -332,9 +325,8 @@ namespace NetRube
 		/// <returns>指示是否为浮点数</returns>
 		public static bool IsFloat_<T>(this T n)
 		{
-			return (n is float
-				|| n is double
-				|| n is decimal);
+			var tc = Type.GetTypeCode(typeof(T));
+			return tc >= TypeCode.Single && tc <= TypeCode.Decimal;
 		}
 		#endregion
 

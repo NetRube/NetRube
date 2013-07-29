@@ -185,7 +185,7 @@ namespace NetRube.Cache
 				while(_enum.MoveNext())
 				{
 					_key = _enum.Key.ToString();
-					_dataType = _enum.Value.GetType().FastGetName();
+					_dataType = _enum.Value.GetType().Name;
 					_dict.Add(_key, _dataType);
 				}
 				return _dict;

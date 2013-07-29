@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -12,7 +11,7 @@ namespace NetRube
 	public static class FastReflection
 	{
 		#region 创建实例
-		private static ConcurrentDictionary<ConstructorInfo, Delegate> OC;
+		private static Dict<ConstructorInfo, Func<object[], object>> OC;
 
 		/// <summary>通过类的构造器信息创建对象实例</summary>
 		/// <param name="constructorInfo">构造器信息</param>
@@ -20,9 +19,9 @@ namespace NetRube
 		/// <returns>新对象实例</returns>
 		public static object FastInvoke(this ConstructorInfo constructorInfo, params object[] parameters)
 		{
-			if(OC == null) OC = new ConcurrentDictionary<ConstructorInfo, Delegate>();
-			Delegate exec;
-			if(!OC.TryGetValue(constructorInfo, out exec))
+			if(OC == null) OC = new Dict<ConstructorInfo, Func<object[], object>>();
+
+			var exec = OC.Get(constructorInfo, () =>
 			{
 				var parametersParameter = Expression.Parameter(typeof(object[]), "parameters");
 				var parameterExpressions = new List<Expression>();
@@ -40,10 +39,9 @@ namespace NetRube
 				var instanceCreateCast = Expression.Convert(instanceCreate, typeof(object));
 				var lambda = Expression.Lambda<Func<object[], object>>(instanceCreateCast, parametersParameter);
 
-				exec = lambda.Compile();
-				OC.TryAdd(constructorInfo, exec);
-			}
-			return ((Func<object[], object>)exec)(parameters);
+				return lambda.Compile();
+			});
+			return exec(parameters);
 		}
 
 		/// <summary>通过类的构造器信息创建对象实例</summary>
@@ -110,7 +108,7 @@ namespace NetRube
 		#endregion
 
 		#region 方法
-		private static ConcurrentDictionary<MethodInfo, Delegate> MC;
+		private static Dict<MethodInfo, Func<object, object[], object>> MC;
 
 		/// <summary>快速调用对象实例的方法</summary>
 		/// <param name="methodInfo">要调用的方法</param>
@@ -121,9 +119,8 @@ namespace NetRube
 		{
 			if(methodInfo == null) return null;
 
-			if(MC == null) MC = new ConcurrentDictionary<MethodInfo, Delegate>();
-			Delegate exec;
-			if(!MC.TryGetValue(methodInfo, out exec))
+			if(MC == null) MC = new Dict<MethodInfo, Func<object, object[], object>>();
+			var exec = MC.Get(methodInfo, () =>
 			{
 				var objectType = typeof(object);
 				var objectsType = typeof(object[]);
@@ -149,12 +146,11 @@ namespace NetRube
 					var lambda = Expression.Lambda<Action<object, object[]>>(methodCall, instanceParameter, parametersParameter);
 
 					var act = lambda.Compile();
-					Func<object, object[], object> execute = (inst, para) =>
+					return (inst, para) =>
 					{
 						act(inst, para);
 						return null;
 					};
-					exec = execute;
 				}
 				else
 				{
@@ -162,11 +158,10 @@ namespace NetRube
 					var lambda = Expression.Lambda<Func<object, object[], object>>(
 						castMethodCall, instanceParameter, parametersParameter);
 
-					exec = lambda.Compile();
+					return lambda.Compile();
 				}
-				MC.TryAdd(methodInfo, exec);
-			}
-			return ((Func<object, object[], object>)exec)(instance, parameters);
+			});
+			return exec(instance, parameters);
 		}
 
 		/// <summary>通过方法名称快速调用对象实例的方法</summary>
@@ -188,7 +183,7 @@ namespace NetRube
 
 		#region 属性
 		#region 获取
-		private static ConcurrentDictionary<PropertyInfo, Delegate> PGC;
+		private static Dict<PropertyInfo, Func<object, object>> PGC;
 
 		/// <summary>快速获取对象属性值</summary>
 		/// <param name="propertyInfo">要获取的对象属性</param>
@@ -199,18 +194,16 @@ namespace NetRube
 			if(propertyInfo == null) return null;
 			if(!propertyInfo.CanRead) return null;
 
-			if(PGC == null) PGC = new ConcurrentDictionary<PropertyInfo, Delegate>();
-			Delegate exec;
-			if(!PGC.TryGetValue(propertyInfo, out exec))
+			if(PGC == null) PGC = new Dict<PropertyInfo, Func<object, object>>();
+			var exec = PGC.Get(propertyInfo, () =>
 			{
 				if(propertyInfo.GetIndexParameters().Length > 0)
 				{
 					// 对索引属性直接返回默认值
-					Func<object, object> execute = (inst) =>
+					return (inst) =>
 					{
 						return null;
 					};
-					exec = execute;
 				}
 				else
 				{
@@ -221,11 +214,10 @@ namespace NetRube
 					var castPropertyValue = Expression.Convert(propertyAccess, objType);
 					var lambda = Expression.Lambda<Func<object, object>>(castPropertyValue, instanceParameter);
 
-					exec = lambda.Compile();
+					return lambda.Compile();
 				}
-				PGC.TryAdd(propertyInfo, exec);
-			}
-			return ((Func<object, object>)exec)(instance);
+			});
+			return exec(instance);
 		}
 
 		/// <summary>通过属性名称快速获取对象属性值</summary>
@@ -261,7 +253,7 @@ namespace NetRube
 		#endregion
 
 		#region 设置
-		private static ConcurrentDictionary<PropertyInfo, Delegate> PSC;
+		private static Dict<PropertyInfo, Action<object, object>> PSC;
 
 		/// <summary>快速设置对象属性值</summary>
 		/// <param name="propertyInfo">要设置的对象属性</param>
@@ -272,15 +264,13 @@ namespace NetRube
 			if(propertyInfo == null) return;
 			if(!propertyInfo.CanWrite) return;
 
-			if(PSC == null) PSC = new ConcurrentDictionary<PropertyInfo, Delegate>();
-			Delegate exec;
-			if(!PSC.TryGetValue(propertyInfo, out exec))
+			if(PSC == null) PSC = new Dict<PropertyInfo, Action<object, object>>();
+			var exec = PSC.Get(propertyInfo, () =>
 			{
 				if(propertyInfo.GetIndexParameters().Length > 0)
 				{
 					// 对索引属性直接无视
-					Action<object, object> execute = (inst, para) => { };
-					exec = execute;
+					return (inst, para) => { };
 				}
 				else
 				{
@@ -293,11 +283,10 @@ namespace NetRube
 					var propertyAssign = Expression.Assign(propertyAccess, valueCast);
 					var lambda = Expression.Lambda<Action<object, object>>(propertyAssign, instanceParameter, valueParameter);
 
-					exec = lambda.Compile();
+					return lambda.Compile();
 				}
-				PSC.TryAdd(propertyInfo, exec);
-			}
-			((Action<object, object>)exec)(instance, value);
+			});
+			exec(instance, value);
 		}
 
 		/// <summary>通过属性名称快速设置对象属性值</summary>
@@ -315,7 +304,7 @@ namespace NetRube
 
 		#region 字段
 		#region 读取
-		private static ConcurrentDictionary<FieldInfo, Delegate> FGC;
+		private static Dict<FieldInfo, Func<object, object>> FGC;
 
 		/// <summary>快速获取对象字段值</summary>
 		/// <param name="fieldInfo">要获取的对象字段</param>
@@ -325,9 +314,8 @@ namespace NetRube
 		{
 			if(fieldInfo == null) return null;
 
-			if(FGC == null) FGC = new ConcurrentDictionary<FieldInfo, Delegate>();
-			Delegate exec;
-			if(!FGC.TryGetValue(fieldInfo, out exec))
+			if(FGC == null) FGC = new Dict<FieldInfo, Func<object, object>>();
+			var exec = FGC.Get(fieldInfo, () =>
 			{
 				var objType = typeof(object);
 				var instanceParameter = Expression.Parameter(objType, "instance");
@@ -336,10 +324,9 @@ namespace NetRube
 				var castFieldValue = Expression.Convert(fieldAccess, objType);
 				var lambda = Expression.Lambda<Func<object, object>>(castFieldValue, instanceParameter);
 
-				exec = lambda.Compile();
-				FGC.TryAdd(fieldInfo, exec);
-			}
-			return ((Func<object, object>)exec)(instance);
+				return lambda.Compile();
+			});
+			return exec(instance);
 		}
 
 		/// <summary>通过字段名称快速获取对象字段值</summary>
@@ -375,7 +362,7 @@ namespace NetRube
 		#endregion
 
 		#region 设置
-		private static ConcurrentDictionary<FieldInfo, Delegate> FSC;
+		private static Dict<FieldInfo, Action<object, object>> FSC;
 
 		/// <summary>快速设置对象字段值</summary>
 		/// <param name="fieldInfo">要设置的对象字段</param>
@@ -385,9 +372,8 @@ namespace NetRube
 		{
 			if(fieldInfo == null) return;
 
-			if(FSC == null) FSC = new ConcurrentDictionary<FieldInfo, Delegate>();
-			Delegate exec;
-			if(!FSC.TryGetValue(fieldInfo, out exec))
+			if(FSC == null) FSC = new Dict<FieldInfo, Action<object, object>>();
+			var exec = FSC.Get(fieldInfo, () =>
 			{
 				var objType = typeof(object);
 				var instanceParameter = Expression.Parameter(objType, "instance");
@@ -398,10 +384,9 @@ namespace NetRube
 				var fieldAssign = Expression.Assign(fieldAccess, valueCast);
 				var lambda = Expression.Lambda<Action<object, object>>(fieldAssign, instanceParameter, valueParameter);
 
-				exec = lambda.Compile();
-				FSC.TryAdd(fieldInfo, exec);
-			}
-			((Action<object, object>)exec)(instance, value);
+				return lambda.Compile();
+			});
+			exec(instance, value);
 		}
 
 		/// <summary>通过字段名称快速设置对象字段值</summary>
@@ -418,74 +403,8 @@ namespace NetRube
 		#endregion
 
 		#region 类型相关
-		private static ConcurrentDictionary<Type, TypeNames> TNC;
-		private static TypeNames GetTypeNames(Type type)
-		{
-			if(TNC == null) TNC = new ConcurrentDictionary<Type, TypeNames>();
-
-			TypeNames tns;
-			if(!TNC.TryGetValue(type, out tns))
-			{
-				tns = new TypeNames
-				{
-					TypeName = type.Name,
-					FullName = type.FullName,
-					AssemblyName = type.AssemblyQualifiedName
-				};
-				TNC.TryAdd(type, tns);
-			}
-			return tns;
-		}
-
-		/// <summary>快速获取类型的程序集限定名称</summary>
-		/// <param name="type">要获取的类型</param>
-		/// <returns>类型的程序集限定名称</returns>
-		public static string FastGetAssemblyName(this Type type)
-		{
-			return GetTypeNames(type).AssemblyName;
-		}
-
-		/// <summary>快速获取类型的程序集限定名称</summary>
-		/// <typeparam name="T">要获取的类型</param>
-		/// <returns>类型的程序集限定名称</returns>
-		public static string FastGetTypeAssemblyName<T>()
-		{
-			return GetTypeNames(typeof(T)).AssemblyName;
-		}
-
-		/// <summary>快速获取类型名称</summary>
-		/// <param name="type">要获取的类型</param>
-		/// <returns>类型名称</returns>
-		public static string FastGetName(this Type type)
-		{
-			return GetTypeNames(type).TypeName;
-		}
-
-		/// <summary>快速获取类型名称</summary>
-		/// <typeparam name="T">要获取的类型</param>
-		/// <returns>类型名称</returns>
-		public static string FastGetTypeName<T>()
-		{
-			return GetTypeNames(typeof(T)).TypeName;
-		}
-
-		/// <summary>快速获取类型完全限定名称</summary>
-		/// <param name="type">要获取的类型</param>
-		/// <returns>类型完全限定名称</returns>
-		public static string FastGetFullName(this Type type)
-		{
-			return GetTypeNames(type).FullName;
-		}
-
-		/// <summary>快速获取类型完全限定名称</summary>
-		/// <typeparam name="T">要获取的类型</param>
-		/// <returns>类型完全限定名称</returns>
-		public static string FastGetTypeFullName<T>()
-		{
-			return GetTypeNames(typeof(T)).FullName;
-		}
-
-		private static ConcurrentDictionary<string, Type> NTC;
+		#region 获取类型
+		private static Dict<string, Type> NTC;
 
 		/// <summary>通过类型的程序集限定名称获取类型</summary>
 		/// <param name="typeName">要获取的类型的程序集限定名称</param>
@@ -496,31 +415,29 @@ namespace NetRube
 			if(typeName.IsNullOrEmpty_())
 				throw new ArgumentNullOrEmptyException();
 
-			if(NTC == null) NTC = new ConcurrentDictionary<string, Type>();
+			if(NTC == null) NTC = new Dict<string, Type>(StringComparer.OrdinalIgnoreCase);
 			typeName = typeName.Trim();
-			Type val = null;
-			if(!NTC.TryGetValue(typeName, out val))
+			return NTC.Get(typeName, () =>
 			{
-				val = Type.GetType(typeName, true, true);
-				NTC.TryAdd(typeName, val);
-			}
-			return val;
+				return Type.GetType(typeName, true, true);
+			});
 		}
+		#endregion
 
-		private static ConcurrentDictionary<string, Dictionary<string, Accessor>> AC;
+		#region 获取类型访问器
+		private static Dict<string, Dictionary<string, Accessor>> AC;
 
 		/// <summary>获取类型的访问器集合</summary>
 		/// <param name="type">要获取的类型</param>
 		/// <returns>类型的访问器集合</returns>
 		public static Dictionary<string, Accessor> FastGetAccessors(this Type type)
 		{
-			if(AC == null) AC = new ConcurrentDictionary<string, Dictionary<string, Accessor>>();
+			if(AC == null) AC = new Dict<string, Dictionary<string, Accessor>>(StringComparer.OrdinalIgnoreCase);
 
-			Dictionary<string, Accessor> ls;
-			var typeName = type.FastGetFullName();
-			if(!AC.TryGetValue(typeName, out ls))
+			var typeName = type.FullName;
+			return AC.Get(typeName, () =>
 			{
-				ls = new Dictionary<string, Accessor>();
+				var ls = new Dictionary<string, Accessor>(StringComparer.OrdinalIgnoreCase);
 				var props = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
 				var name = string.Empty;
 				foreach(var p in props)
@@ -556,19 +473,18 @@ namespace NetRube
 					ls.Add(name, a);
 				}
 
-				AC.TryAdd(typeName, ls);
-			}
-
-			return ls;
+				return ls;
+			});
 		}
 
 		/// <summary>获取类型的访问器集合</summary>
-		/// <typeparam name="T">要获取的类型</param>
+		/// <typeparam name="T">要获取的类型</typeparam>
 		/// <returns>类型的访问器集合</returns>
 		public static Dictionary<string, Accessor> FastGetAccessors<T>()
 		{
 			return typeof(T).FastGetAccessors();
 		}
+		#endregion
 		#endregion
 	}
 }

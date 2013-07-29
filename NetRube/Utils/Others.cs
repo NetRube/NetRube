@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Reflection.Emit;
 
 namespace NetRube
 {
@@ -101,6 +99,7 @@ namespace NetRube
 		}
 		#endregion
 
+		#region GetDescription
 		/// <summary>获取枚举值的说明（Description 属性），如果不存在则返回该枚举值的名称</summary>
 		/// <param name="e">枚举值</param>
 		/// <returns>说明或名称</returns>
@@ -111,6 +110,7 @@ namespace NetRube
 			var des = type.GetField(val).GetCustomAttributes(typeof(DescriptionAttribute), false).FirstOrDefault();
 			return des == null ? val : ((DescriptionAttribute)des).Description;
 		}
+		#endregion
 
 		#region GetLocalization
 		/// <summary>获取本地化资源</summary>

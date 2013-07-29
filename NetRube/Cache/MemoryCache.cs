@@ -131,7 +131,7 @@ namespace NetRube.Cache
 			{
 				Key = key,
 				Data = value,
-				DataType = typeof(T).FastGetName(),
+				DataType = typeof(T).Name,
 				ExpTime = this.GetExpTime(expire),
 				ExpType = absExpire ? ExpType.Absolute : ExpType.Relative,
 				ExpSpan = expire
@@ -167,7 +167,7 @@ namespace NetRube.Cache
 			{
 				Key = key,
 				Data = value,
-				DataType = typeof(T).FastGetName(),
+				DataType = typeof(T).Name,
 				ExpTime = fileTime,
 				ExpType = ExpType.FileDependency,
 				DepPath = filePath

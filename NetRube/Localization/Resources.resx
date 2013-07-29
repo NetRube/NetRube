@@ -330,4 +330,7 @@
   <data name="MailPriorityNormal" xml:space="preserve">
     <value>正常</value>
   </data>
+  <data name="NotSubclassException" xml:space="preserve">
+    <value>{0} 类并不是 {1} 类的派生的</value>
+  </data>
 </root>

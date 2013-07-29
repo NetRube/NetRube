@@ -738,15 +738,38 @@ namespace NetRube
 			return long.TryParse(str, NumberStyles.Integer, null, out num);
 		}
 
-		/// <summary>验证是否属于十六进制字符串</summary>
-		/// <param name="str">要验证的字符串</param>
+		/// <summary>验证是否是 ASCII(0-127)字符串</summary>
+		/// <param name="str">要验证的字符</param>
+		/// <returns>指示是否为 ASCII(0-127)字符串</returns>
+		public static bool IsAscii_(this string str)
+		{
+			if(str.IsNullOrEmpty_()) return false;
+			return str.All(c => c.IsAscii_());
+		}
+
+		/// <summary>验证是否是拉丁(0-255)字符串</summary>
+		/// <param name="str">要验证的字符</param>
+		/// <returns>指示是否为拉丁(0-255)字符串</returns>
+		public static bool IsLatin_(this string str)
+		{
+			if(str.IsNullOrEmpty_()) return false;
+			return str.All(c => c.IsLatin_());
+		}
+
+		/// <summary>验证是否是空白字符串</summary>
+		/// <param name="str">要验证的字符</param>
+		/// <returns>指示是否为空白字符串</returns>
+		public static bool IsWhiteSpace_(this string str)
+		{
+			return str.All(c => c.IsWhiteSpace_());
+		}
+
+		/// <summary>验证是否是十六进制字符串</summary>
+		/// <param name="str">要验证的字符</param>
 		/// <returns>指示是否为十六进制字符串</returns>
 		public static bool IsHex_(this string str)
 		{
-			if(str.IsNullOrEmpty_()) return false;
-			foreach(var s in str)
-				if(!s.IsHex_()) return false;
-			return true;
+			return str.All(c => c.IsHex_());
 		}
 
 		/// <summary>验证是否是 Guid 字符串</summary>

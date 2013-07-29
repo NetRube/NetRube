@@ -467,6 +467,15 @@ namespace NetRube
 		}
 
 		/// <summary>转换为相应的枚举值</summary>
+		/// <param name="str">要转换的字符串</param>
+		/// <param name="type">枚举类型</param>
+		/// <returns>相应的枚举值或默认值</returns>
+		public static object ToEnum_(this string str, Type type)
+		{
+			return Enum.Parse(type, str, true);
+		}
+
+		/// <summary>转换为相应的枚举值</summary>
 		/// <typeparam name="T">枚举类型</typeparam>
 		/// <param name="num">要转换的数字</param>
 		/// <param name="defval">转换不成功时的默认值</param>
@@ -499,6 +508,16 @@ namespace NetRube
 				if(Enum.IsDefined(_type, _retval))
 					return _retval;
 			return null;
+		}
+
+		/// <summary>转换为相应的枚举值</summary>
+		/// <param name="str">要转换的字符串</param>
+		/// <param name="type">枚举类型</param>
+		/// <returns>相应的枚举值或默认值</returns>
+		public static object ToEnumOrNull_(this string str, Type type)
+		{
+			try { return Enum.Parse(type, str, true); }
+			catch { return null; }
 		}
 
 		/// <summary>转换为相应的枚举值</summary>
@@ -739,9 +758,9 @@ namespace NetRube
 		#endregion
 
 		#region ToIEnumerable
-		/// <summary>将 Enum 转换为 <see cref="Dictionary&lt;int, string&gt;" /> 集合</summary>
+		/// <summary>将 Enum 转换为 Dictionary&lt;int, string&gt; 集合</summary>
 		/// <typeparam name="T">数据类型</typeparam>
-		/// <returns><see cref="Dictionary&lt;int, string&gt;" /> 集合</returns>
+		/// <returns>Dictionary&lt;int, string&gt; 集合</returns>
 		public static Dictionary<int, string> ToDict_<T>() where T : struct
 		{
 			Type type = typeof(T);
@@ -794,10 +813,10 @@ namespace NetRube
 		}
 
 		/// <summary>
-		/// 将 Enum 转换为 <see cref="List&lt;KeyValuePair&lt;int, string&gt;&gt;" /> 集合
+		/// 将 Enum 转换为 List&lt;KeyValuePair&lt;int, string&gt;&gt; 集合
 		/// </summary>
 		/// <typeparam name="T">数据类型</typeparam>
-		/// <returns><see cref="List&lt;KeyValuePair&lt;int, string&gt;&gt;" /> 集合</returns>
+		/// <returns>List&lt;KeyValuePair&lt;int, string&gt;&gt; 集合</returns>
 		public static List<KeyValuePair<int, string>> ToKVL_<T>() where T : struct
 		{
 			Type type = typeof(T);
@@ -822,11 +841,11 @@ namespace NetRube
 			return kvl;
 		}
 
-		/// <summary>将 Enum 转换为 <see cref="Dictionary&lt;int, string&gt;" /> 集合</summary>
+		/// <summary>将 Enum 转换为 Dictionary&lt;int, string&gt; 集合</summary>
 		/// <typeparam name="T">数据类型</typeparam>
 		/// <param name="res">所在的本地化资源</param>
 		/// <param name="info">区域性信息</param>
-		/// <returns><see cref="Dictionary&lt;int, string&gt;" /> 集合</returns>
+		/// <returns>Dictionary&lt;int, string&gt; 集合</returns>
 		public static Dictionary<int, string> ToDict_<T>(System.Resources.ResourceManager res, System.Globalization.CultureInfo info = null) where T : struct
 		{
 			Type type = typeof(T);
@@ -876,12 +895,12 @@ namespace NetRube
 		}
 
 		/// <summary>
-		/// 将 Enum 转换为 <see cref="List&lt;KeyValuePair&lt;int, string&gt;&gt;" /> 集合
+		/// 将 Enum 转换为 List&lt;KeyValuePair&lt;int, string&gt;&gt; 集合
 		/// </summary>
 		/// <typeparam name="T">数据类型</typeparam>
 		/// <param name="res">所在的本地化资源</param>
 		/// <param name="info">区域性信息</param>
-		/// <returns><see cref="List&lt;KeyValuePair&lt;int, string&gt;&gt;" /> 集合</returns>
+		/// <returns>List&lt;KeyValuePair&lt;int, string&gt;&gt; 集合</returns>
 		public static List<KeyValuePair<int, string>> ToKVL_<T>(System.Resources.ResourceManager res, System.Globalization.CultureInfo info = null) where T : struct
 		{
 			Type type = typeof(T);

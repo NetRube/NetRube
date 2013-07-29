@@ -49,6 +49,7 @@
     <Compile Include="Cache\ICache.cs" />
     <Compile Include="Cache\MemoryCache.cs" />
     <Compile Include="Cache\WebCache.cs" />
+    <Compile Include="Dict.cs" />
     <Compile Include="Enum\AccessorType.cs" />
     <Compile Include="Enum\QueryOperatorType.cs" />
     <Compile Include="FastJson\JsonAccessor.cs" />
@@ -88,7 +89,6 @@
     <Compile Include="StartAndEnd.cs" />
     <Compile Include="STR.cs" />
     <Compile Include="Separator.cs" />
-    <Compile Include="TypeNames.cs" />
     <Compile Include="Utils\Array.cs" />
     <Compile Include="Utils\Char.cs" />
     <Compile Include="Utils\CheckValue.cs" />
@@ -117,9 +117,7 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Localization\Resources.zh-TW.resx" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Data\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

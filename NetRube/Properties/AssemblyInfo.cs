@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("NetRube Studio")]
 [assembly: AssemblyProduct("NetRube")]
-[assembly: AssemblyCopyright("Copyright © NetRube Studio 2012")]
+[assembly: AssemblyCopyright("Copyright © NetRube Studio 2013")]
 [assembly: AssemblyTrademark("NetRube")]
 [assembly: AssemblyCulture("")]
 

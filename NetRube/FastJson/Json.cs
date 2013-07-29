@@ -145,7 +145,7 @@ namespace NetRube.FastJson
 			if(type == null)
 				throw new ArgumentNullException(Localization.Resources.CannotDetermineType);
 			
-			var typeName = type.FastGetFullName();
+			var typeName = type.FullName;
 			var obj = input;
 			if(obj == null)
 				obj = type.FastInvoke();
