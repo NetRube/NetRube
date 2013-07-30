@@ -84,18 +84,29 @@ namespace NetRube
 		/// <exception cref="System.InvalidOperationException"></exception>
 		public static PropertyInfo GetPropertyInfo(Expression expression)
 		{
+			Type type = null;
 			Expression body = expression;
-			if(body is LambdaExpression)
-				body = (body as LambdaExpression).Body;
-			if(body is UnaryExpression)
-				body = (body as UnaryExpression).Operand;
-			switch(body.NodeType)
+			var le = body as LambdaExpression;
+			if(le != null)
 			{
-				case ExpressionType.MemberAccess:
-					return (body as MemberExpression).Member as PropertyInfo;
-				default:
-					throw new InvalidOperationException();
+				body = le.Body;
+				type = le.Parameters[0].Type;
 			}
+			var ue = body as UnaryExpression;
+			if(ue != null)
+			{
+				body = ue.Operand;
+			}
+
+			var me = body as MemberExpression;
+			if(me != null)
+			{
+				if(type != null)
+					return type.GetProperty(me.Member.Name);
+				return me.Member as PropertyInfo;
+			}
+
+			throw new InvalidOperationException();
 		}
 		#endregion
 
