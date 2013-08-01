@@ -5,7 +5,7 @@ namespace NetRube
 {
 	/// <summary>跟踪实体对象</summary>
 	/// <typeparam name="T">实体类型</typeparam>
-	public class TrackingEntity<T> where T : class,new()
+	public class TrackingEntity<T> where T : new()
 	{
 		private Parameters PARAMS;
 
@@ -37,19 +37,22 @@ namespace NetRube
 		}
 
 		/// <summary>获取被更改属性列表</summary>
+		/// <param name="entity">要跟踪的实体</param>
+		/// <param name="refer">用于参照的实体</param>
+		/// <param name="param">参数</param>
 		/// <returns>被更改的集合</returns>
-		public List<Change> GetChanges()
+		public static List<Change> GetChanges(T entity, T refer, Parameters param = null)
 		{
 			var als = FastReflection.FastGetAccessors<T>();
 			var ls = new List<Change>(als.Count);
 
 			foreach(var a in als.Values)
 			{
-				if(this.PARAMS.IgnoreVirtual && a.IsVirtual) continue;
+				if(param.IgnoreVirtual && a.IsVirtual) continue;
 				if(!a.CanRade) continue;
 
-				var v1 = a.GetValue(this.OriginalEntity);
-				var v2 = a.GetValue(this.TrackedEntity);
+				var v1 = a.GetValue(entity);
+				var v2 = a.GetValue(refer);
 				if(!AreEqual(v1, v2))
 					ls.Add(new Change { Name = a.Name, OldValue = v1, NewValue = v2 });
 			}
@@ -57,18 +60,25 @@ namespace NetRube
 			return ls;
 		}
 
+		private static bool AreEqual(object first, object second)
+		{
+			if(first == null && second == null) return true;
+			if(first == null && second != null) return false;
+			return first.Equals(second);
+		}
+
+		/// <summary>获取被更改属性列表</summary>
+		/// <returns>被更改的集合</returns>
+		public List<Change> GetChanges()
+		{
+			return GetChanges(this.OriginalEntity, this.TrackedEntity, this.PARAMS);
+		}
+
 		/// <summary>获取被更改属性名称列表</summary>
 		/// <returns>被更改的属性名称集合</returns>
 		public List<string> GetChangeNames()
 		{
 			return this.GetChanges().Select(c => c.Name).ToList();
-		}
-
-		private bool AreEqual(object first, object second)
-		{
-			if(first == null && second == null) return true;
-			if(first == null && second != null) return false;
-			return first.Equals(second);
 		}
 
 		/// <summary>更改内容</summary>
