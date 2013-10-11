@@ -36,7 +36,7 @@ namespace NetRube
 		/// <returns>属性名称</returns>
 		public static string GetPropertyName<T>(Expression<Func<T, object>> expression)
 		{
-			return GetPropertyInfo<T>((Expression)expression).Name;
+			return GetPropertyName((Expression)expression);
 		}
 
 		/// <summary>获取属性名称</summary>
@@ -46,7 +46,7 @@ namespace NetRube
 		/// <returns>属性名称</returns>
 		public static string GetPropertyName<T, V>(Expression<Func<T, V>> expression)
 		{
-			return GetPropertyInfo<T>((Expression)expression).Name;
+			return GetPropertyName((Expression)expression);
 		}
 
 		/// <summary>获取属性名称</summary>
@@ -54,7 +54,18 @@ namespace NetRube
 		/// <returns>属性名称</returns>
 		public static string GetPropertyName(Expression expression)
 		{
-			return GetPropertyInfo(expression).Name;
+			var body = expression;
+			var le = body as LambdaExpression;
+			if(le != null)
+				body = le.Body;
+			var ue = body as UnaryExpression;
+			if(ue != null)
+				body = ue.Operand;
+			var me = body as MemberExpression;
+			if(me != null)
+				return me.Member.Name;
+
+			throw new InvalidOperationException();
 		}
 
 		/// <summary>获取属性名称</summary>
@@ -63,7 +74,7 @@ namespace NetRube
 		/// <returns>属性名称</returns>
 		public static string GetPropertyName<T>(Expression expression)
 		{
-			return GetPropertyInfo<T>(expression).Name;
+			return GetPropertyName(expression);
 		}
 		#endregion
 
@@ -74,7 +85,7 @@ namespace NetRube
 		/// <returns>属性信息</returns>
 		public static PropertyInfo GetPropertyInfo<T>(Expression<Func<T, object>> expression)
 		{
-			return GetPropertyInfo<T>((Expression)expression);
+			return GetPropertyInfo((Expression)expression);
 		}
 
 		/// <summary>获取属性信息</summary>
@@ -84,7 +95,7 @@ namespace NetRube
 		/// <returns>属性信息</returns>
 		public static PropertyInfo GetPropertyInfo<T, V>(Expression<Func<T, V>> expression)
 		{
-			return GetPropertyInfo<T>((Expression)expression);
+			return GetPropertyInfo((Expression)expression);
 		}
 
 		/// <summary>获取属性信息</summary>
@@ -93,26 +104,21 @@ namespace NetRube
 		/// <exception cref="System.InvalidOperationException"></exception>
 		public static PropertyInfo GetPropertyInfo(Expression expression)
 		{
-			Type type = null;
-			Expression body = expression;
+			var body = expression;
 			var le = body as LambdaExpression;
 			if(le != null)
-			{
 				body = le.Body;
-				type = le.Parameters[0].Type;
-			}
 			var ue = body as UnaryExpression;
 			if(ue != null)
-			{
 				body = ue.Operand;
-			}
-
 			var me = body as MemberExpression;
 			if(me != null)
 			{
-				if(type != null)
-					return type.GetProperty(me.Member.Name);
-				return me.Member as PropertyInfo;
+				var et = me.Expression.Type;
+				var mm = me.Member;
+				if(mm.ReflectedType == et)
+					return mm as PropertyInfo;
+				return et.GetProperty(mm.Name);
 			}
 
 			throw new InvalidOperationException();
@@ -125,23 +131,7 @@ namespace NetRube
 		/// <exception cref="System.InvalidOperationException"></exception>
 		public static PropertyInfo GetPropertyInfo<T>(Expression expression)
 		{
-			var type = typeof(T);
-			var body = expression;
-			var le = body as LambdaExpression;
-			if(le != null)
-				body = le.Body;
-			var ue = body as UnaryExpression;
-			if(ue != null)
-				body = ue.Operand;
-			var me = body as MemberExpression;
-			if(me != null)
-			{
-				if(me.Member.ReflectedType == type)
-					return me.Member as PropertyInfo;
-				return type.GetProperty(me.Member.Name);
-			}
-
-			throw new InvalidOperationException();
+			return GetPropertyInfo(expression);
 		}
 		#endregion
 

@@ -15,8 +15,9 @@ namespace NetRubeTest
 		[TestMethod]
 		public void TestMethod1()
 		{
-			var tn = Utils.GetPropertyInfo<B>(b => b.ID).ReflectedType;
-			Assert.AreEqual(typeof(B), tn);
+			var tn = Utils.GetPropertyInfo<B>(b => b.ID);
+			Assert.AreEqual(tn.DeclaringType, tn.ReflectedType);
+			//Assert.AreEqual(Utils.GetPropertyName<B>(b => b.ID), "");
 		}
 	}
 
