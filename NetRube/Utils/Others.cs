@@ -36,7 +36,7 @@ namespace NetRube
 		/// <returns>属性名称</returns>
 		public static string GetPropertyName<T>(Expression<Func<T, object>> expression)
 		{
-			return GetPropertyInfo((Expression)expression).Name;
+			return GetPropertyInfo<T>((Expression)expression).Name;
 		}
 
 		/// <summary>获取属性名称</summary>
@@ -46,7 +46,7 @@ namespace NetRube
 		/// <returns>属性名称</returns>
 		public static string GetPropertyName<T, V>(Expression<Func<T, V>> expression)
 		{
-			return GetPropertyInfo((Expression)expression).Name;
+			return GetPropertyInfo<T>((Expression)expression).Name;
 		}
 
 		/// <summary>获取属性名称</summary>
@@ -55,6 +55,15 @@ namespace NetRube
 		public static string GetPropertyName(Expression expression)
 		{
 			return GetPropertyInfo(expression).Name;
+		}
+
+		/// <summary>获取属性名称</summary>
+		/// <typeparam name="T">实体类型</typeparam>
+		/// <param name="expression">属性表达式</param>
+		/// <returns>属性名称</returns>
+		public static string GetPropertyName<T>(Expression expression)
+		{
+			return GetPropertyInfo<T>(expression).Name;
 		}
 		#endregion
 
@@ -65,7 +74,7 @@ namespace NetRube
 		/// <returns>属性信息</returns>
 		public static PropertyInfo GetPropertyInfo<T>(Expression<Func<T, object>> expression)
 		{
-			return GetPropertyInfo((Expression)expression);
+			return GetPropertyInfo<T>((Expression)expression);
 		}
 
 		/// <summary>获取属性信息</summary>
@@ -75,7 +84,7 @@ namespace NetRube
 		/// <returns>属性信息</returns>
 		public static PropertyInfo GetPropertyInfo<T, V>(Expression<Func<T, V>> expression)
 		{
-			return GetPropertyInfo((Expression)expression);
+			return GetPropertyInfo<T>((Expression)expression);
 		}
 
 		/// <summary>获取属性信息</summary>
@@ -104,6 +113,32 @@ namespace NetRube
 				if(type != null)
 					return type.GetProperty(me.Member.Name);
 				return me.Member as PropertyInfo;
+			}
+
+			throw new InvalidOperationException();
+		}
+
+		/// <summary>获取属性信息</summary>
+		/// <typeparam name="T">实体类型</typeparam>
+		/// <param name="expression">属性表达式</param>
+		/// <returns>属性信息</returns>
+		/// <exception cref="System.InvalidOperationException"></exception>
+		public static PropertyInfo GetPropertyInfo<T>(Expression expression)
+		{
+			var type = typeof(T);
+			var body = expression;
+			var le = body as LambdaExpression;
+			if(le != null)
+				body = le.Body;
+			var ue = body as UnaryExpression;
+			if(ue != null)
+				body = ue.Operand;
+			var me = body as MemberExpression;
+			if(me != null)
+			{
+				if(me.Member.ReflectedType == type)
+					return me.Member as PropertyInfo;
+				return type.GetProperty(me.Member.Name);
 			}
 
 			throw new InvalidOperationException();
