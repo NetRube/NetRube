@@ -2,10 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
-using System.Reflection;
 
 namespace NetRube
 {
@@ -759,96 +757,22 @@ namespace NetRube
 
 		#region ToIEnumerable
 		/// <summary>将 Enum 转换为 Dictionary&lt;int, string&gt; 集合</summary>
-		/// <typeparam name="T">数据类型</typeparam>
-		/// <returns>Dictionary&lt;int, string&gt; 集合</returns>
-		public static Dictionary<int, string> ToDict_<T>() where T : struct
-		{
-			Type type = typeof(T);
-			if(!type.IsEnum) return null;
-
-			var vals = Enum.GetValues(type);
-			if(vals.IsNullOrEmpty_()) return null;
-			var dict = new Dictionary<int, string>(vals.Length);
-			FieldInfo fi;
-			int key;
-			string val;
-			foreach(var item in vals)
-			{
-				key = Convert.ChangeType(item, Enum.GetUnderlyingType(type)).ToInt_();
-				val = item.ToString();
-				fi = type.GetField(val);
-				var att = fi.GetCustomAttributes(typeof(DescriptionAttribute), true).FirstOrDefault();
-				if(att != null)
-					val = ((DescriptionAttribute)att).Description;
-				dict.Add(key, val);
-			}
-			return dict;
-		}
-
-		/// <summary>将 Enum 转换为 <see cref="NameValueCollection" /> 集合</summary>
-		/// <typeparam name="T">数据类型</typeparam>
-		/// <returns><see cref="NameValueCollection" /> 集合</returns>
-		public static NameValueCollection ToNVC_<T>() where T : struct
-		{
-			Type type = typeof(T);
-			if(!type.IsEnum) return null;
-
-			var vals = Enum.GetValues(type);
-			if(vals.IsNullOrEmpty_()) return null;
-			var nvc = new NameValueCollection(vals.Length);
-			FieldInfo fi;
-			string key;
-			string val;
-			foreach(var item in vals)
-			{
-				key = Convert.ChangeType(item, Enum.GetUnderlyingType(type)).ToString();
-				val = item.ToString();
-				fi = type.GetField(val);
-				var att = fi.GetCustomAttributes(typeof(DescriptionAttribute), true).FirstOrDefault();
-				if(att != null)
-					val = ((DescriptionAttribute)att).Description;
-				nvc.Add(key, val);
-			}
-			return nvc;
-		}
-
-		/// <summary>
-		/// 将 Enum 转换为 List&lt;KeyValuePair&lt;int, string&gt;&gt; 集合
-		/// </summary>
-		/// <typeparam name="T">数据类型</typeparam>
-		/// <returns>List&lt;KeyValuePair&lt;int, string&gt;&gt; 集合</returns>
-		public static List<KeyValuePair<int, string>> ToKVL_<T>() where T : struct
-		{
-			Type type = typeof(T);
-			if(!type.IsEnum) return null;
-
-			var vals = Enum.GetValues(type);
-			if(vals.IsNullOrEmpty_()) return null;
-			var kvl = new List<KeyValuePair<int, string>>(vals.Length);
-			FieldInfo fi;
-			int key;
-			string val;
-			foreach(var item in vals)
-			{
-				key = Convert.ChangeType(item, Enum.GetUnderlyingType(type)).ToInt_();
-				val = item.ToString();
-				fi = type.GetField(val);
-				var att = fi.GetCustomAttributes(typeof(DescriptionAttribute), true).FirstOrDefault();
-				if(att != null)
-					val = ((DescriptionAttribute)att).Description;
-				kvl.Add(new KeyValuePair<int, string>(key, val));
-			}
-			return kvl;
-		}
-
-		/// <summary>将 Enum 转换为 Dictionary&lt;int, string&gt; 集合</summary>
-		/// <typeparam name="T">数据类型</typeparam>
+		/// <typeparam name="T">Enum 类型</typeparam>
 		/// <param name="res">所在的本地化资源</param>
 		/// <param name="info">区域性信息</param>
 		/// <returns>Dictionary&lt;int, string&gt; 集合</returns>
-		public static Dictionary<int, string> ToDict_<T>(System.Resources.ResourceManager res, System.Globalization.CultureInfo info = null) where T : struct
+		public static Dictionary<int, string> ToDict_<T>(System.Resources.ResourceManager res = null, System.Globalization.CultureInfo info = null) where T : struct
 		{
-			Type type = typeof(T);
+			return ToDict_(typeof(T), res, info);
+		}
+
+		/// <summary>将 Enum 类型转换为 Dictionary&lt;int, string&gt; 集合</summary>
+		/// <param name="type">Enum 类型</param>
+		/// <param name="res">所在的本地化资源</param>
+		/// <param name="info">区域性信息</param>
+		/// <returns>Dictionary&lt;int, string&gt; 集合</returns>
+		public static Dictionary<int, string> ToDict_(Type type, System.Resources.ResourceManager res = null, System.Globalization.CultureInfo info = null)
+		{
 			if(!type.IsEnum) return null;
 
 			var vals = Enum.GetValues(type);
@@ -860,8 +784,13 @@ namespace NetRube
 			{
 				key = Convert.ChangeType(item, Enum.GetUnderlyingType(type)).ToInt_();
 				name = item.ToString();
-				val = GetLocalization_(type.Name + "_" + name, res, info);
-				if(val.IsNullOrEmpty_())
+				if(res != null)
+				{
+					val = GetLocalization_(type.Name + "_" + name, res, info);
+					if(val.IsNullOrEmpty_())
+						val = name;
+				}
+				else
 					val = name;
 				dict.Add(key, val);
 			}
@@ -869,13 +798,22 @@ namespace NetRube
 		}
 
 		/// <summary>将 Enum 转换为 <see cref="NameValueCollection" /> 集合</summary>
-		/// <typeparam name="T">数据类型</typeparam>
+		/// <typeparam name="T">Enum 类型</typeparam>
 		/// <param name="res">所在的本地化资源</param>
 		/// <param name="info">区域性信息</param>
 		/// <returns><see cref="NameValueCollection" /> 集合</returns>
-		public static NameValueCollection ToNVC_<T>(System.Resources.ResourceManager res, System.Globalization.CultureInfo info = null) where T : struct
+		public static NameValueCollection ToNVC_<T>(System.Resources.ResourceManager res = null, System.Globalization.CultureInfo info = null) where T : struct
 		{
-			Type type = typeof(T);
+			return ToNVC_(typeof(T), res, info);
+		}
+
+		/// <summary>将 Enum 类型转换为 <see cref="NameValueCollection" /> 集合</summary>
+		/// <param name="type">Enum 类型</param>
+		/// <param name="res">所在的本地化资源</param>
+		/// <param name="info">区域性信息</param>
+		/// <returns><see cref="NameValueCollection" /> 集合</returns>
+		public static NameValueCollection ToNVC_(Type type, System.Resources.ResourceManager res = null, System.Globalization.CultureInfo info = null)
+		{
 			if(!type.IsEnum) return null;
 
 			var vals = Enum.GetValues(type);
@@ -886,41 +824,58 @@ namespace NetRube
 			{
 				key = Convert.ChangeType(item, Enum.GetUnderlyingType(type)).ToString();
 				name = item.ToString();
-				val = GetLocalization_(type.Name + "_" + name, res, info);
-				if(val.IsNullOrEmpty_())
+				if(res != null)
+				{
+					val = GetLocalization_(type.Name + "_" + name, res, info);
+					if(val.IsNullOrEmpty_())
+						val = name;
+				}
+				else
 					val = name;
 				nvc.Add(key, val);
 			}
 			return nvc;
 		}
 
-		/// <summary>
-		/// 将 Enum 转换为 List&lt;KeyValuePair&lt;int, string&gt;&gt; 集合
-		/// </summary>
-		/// <typeparam name="T">数据类型</typeparam>
+		/// <summary>将 Enum 转换为 IEnumerable&lt;KeyValuePair&lt;int, string&gt;&gt; 集合</summary>
+		/// <typeparam name="T">Enum 类型</typeparam>
 		/// <param name="res">所在的本地化资源</param>
 		/// <param name="info">区域性信息</param>
-		/// <returns>List&lt;KeyValuePair&lt;int, string&gt;&gt; 集合</returns>
-		public static List<KeyValuePair<int, string>> ToKVL_<T>(System.Resources.ResourceManager res, System.Globalization.CultureInfo info = null) where T : struct
+		/// <returns>IEnumerable&lt;KeyValuePair&lt;int, string&gt;&gt; 集合</returns>
+		public static IEnumerable<KeyValuePair<int, string>> ToKVL_<T>(System.Resources.ResourceManager res = null, System.Globalization.CultureInfo info = null) where T : struct
 		{
-			Type type = typeof(T);
+			return ToKVL_(typeof(T), res, info);
+		}
+
+		/// <summary>将 Enum 类型转换为 IEnumerable&lt;KeyValuePair&lt;int, string&gt;&gt; 集合</summary>
+		/// <param name="type">Enum 类型</param>
+		/// <param name="res">所在的本地化资源</param>
+		/// <param name="info">区域性信息</param>
+		/// <returns>IEnumerable&lt;KeyValuePair&lt;int, string&gt;&gt; 集合</returns>
+		public static IEnumerable<KeyValuePair<int, string>> ToKVL_(Type type, System.Resources.ResourceManager res = null, System.Globalization.CultureInfo info = null)
+		{
 			if(!type.IsEnum) return null;
 
 			var vals = Enum.GetValues(type);
 			if(vals.IsNullOrEmpty_()) return null;
-			var kvl = new List<KeyValuePair<int, string>>(vals.Length);
+			var kvls = new List<KeyValuePair<int, string>>(vals.Length);
 			int key;
 			string val, name;
 			foreach(var item in vals)
 			{
 				key = Convert.ChangeType(item, Enum.GetUnderlyingType(type)).ToInt_();
 				name = item.ToString();
-				val = GetLocalization_(type.Name + "_" + name, res, info);
-				if(val.IsNullOrEmpty_())
+				if(res != null)
+				{
+					val = GetLocalization_(type.Name + "_" + name, res, info);
+					if(val.IsNullOrEmpty_())
+						val = name;
+				}
+				else
 					val = name;
-				kvl.Add(new KeyValuePair<int, string>(key, val));
+				kvls.Add(new KeyValuePair<int, string>(key, val));
 			}
-			return kvl;
+			return kvls;
 		}
 		#endregion
 
